@@ -6,6 +6,9 @@ on:
       - "v*"
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build:
     strategy:
@@ -34,7 +37,7 @@ jobs:
 
       - name: Instalar tkinter (solo Linux)
         if: runner.os == 'Linux'
-        run: sudo apt-get install -y python3-tk
+        run: sudo apt-get update && sudo apt-get install -y python3-tk
 
       - name: Instalar PyInstaller
         run: pip install pyinstaller
@@ -52,7 +55,6 @@ jobs:
     name: Crear release
     needs: build
     runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/')
 
     steps:
       - name: Descargar todos los artefactos
