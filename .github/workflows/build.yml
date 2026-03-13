@@ -1,0 +1,66 @@
+name: Build Directorio
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        include:
+          - os: macos-latest
+            nombre: Directorio-macOS
+            ejecutable: dist/Directorio
+          - os: windows-latest
+            nombre: Directorio-Windows
+            ejecutable: dist/Directorio.exe
+          - os: ubuntu-latest
+            nombre: Directorio-Linux
+            ejecutable: dist/Directorio
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Descargar código
+        uses: actions/checkout@v4
+
+      - name: Configurar Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Instalar tkinter (solo Linux)
+        if: runner.os == 'Linux'
+        run: sudo apt-get install -y python3-tk
+
+      - name: Instalar PyInstaller
+        run: pip install pyinstaller
+
+      - name: Compilar ejecutable
+        run: pyinstaller --onefile --windowed --name Directorio app.py
+
+      - name: Subir ejecutable como artefacto
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.nombre }}
+          path: ${{ matrix.ejecutable }}
+
+  release:
+    name: Crear release
+    needs: build
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+
+    steps:
+      - name: Descargar todos los artefactos
+        uses: actions/download-artifact@v4
+        with:
+          path: artefactos/
+
+      - name: Crear release en GitHub
+        uses: softprops/action-gh-release@v2
+        with:
+          files: artefactos/**/*

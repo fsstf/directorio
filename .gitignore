@@ -1,0 +1,14 @@
+# Python
+__pycache__/
+*.pyc
+
+# Base de datos (contiene datos de pacientes)
+*.db
+
+# PyInstaller
+dist/
+build/
+*.spec
+
+# macOS
+.DS_Store
