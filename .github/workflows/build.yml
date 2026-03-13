@@ -16,13 +16,13 @@ jobs:
         include:
           - os: macos-latest
             nombre: Directorio-macOS
-            ejecutable: dist/Directorio
+            ejecutable: dist/Directorio-macOS
           - os: windows-latest
             nombre: Directorio-Windows
-            ejecutable: dist/Directorio.exe
+            ejecutable: dist/Directorio-Windows.exe
           - os: ubuntu-latest
             nombre: Directorio-Linux
-            ejecutable: dist/Directorio
+            ejecutable: dist/Directorio-Linux
 
     runs-on: ${{ matrix.os }}
 
@@ -30,7 +30,7 @@ jobs:
       - name: Descargar código
         uses: actions/checkout@v4
 
-      - name: Configurar Python 3.12
+      - name: Configurar Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
@@ -44,6 +44,17 @@ jobs:
 
       - name: Compilar ejecutable
         run: pyinstaller --onefile --windowed --name Directorio app.py
+
+      - name: Renombrar ejecutable según sistema
+        shell: bash
+        run: |
+          if [ "$RUNNER_OS" == "Windows" ]; then
+            mv dist/Directorio.exe dist/Directorio-Windows.exe
+          elif [ "$RUNNER_OS" == "macOS" ]; then
+            mv dist/Directorio dist/Directorio-macOS
+          else
+            mv dist/Directorio dist/Directorio-Linux
+          fi
 
       - name: Subir ejecutable como artefacto
         uses: actions/upload-artifact@v4
@@ -65,4 +76,5 @@ jobs:
       - name: Crear release en GitHub
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ github.ref_name }}
           files: artefactos/**/*
