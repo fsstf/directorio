@@ -6,18 +6,19 @@ crear_bd()
 
 # ======== VENTANA ========
 ventana = tk.Tk()
-ventana.title("Directorio")
-ventana.geometry("720x600")
+ventana.title("Directorio Telefónico")
+ventana.geometry("1000x750")
 ventana.resizable(False, False)
 
 BG     = "#f5f6fa"
-AZUL   = "#1a6b8a"
+AZUL   = "#00594c"
+BOTON  = "#2471a3"
 VERDE  = "#27ae60"
 ROJO   = "#e74c3c"
 GRIS   = "#7f8c8d"
 BLANCO = "#ffffff"
-FONT   = ("Segoe UI", 10)
-BOLD   = ("Segoe UI", 10, "bold")
+FONT   = ("Segoe UI", 13)
+BOLD   = ("Segoe UI", 13, "bold")
 
 ventana.configure(bg=BG)
 
@@ -26,7 +27,7 @@ style = ttk.Style()
 style.theme_use("clam")
 style.configure("Treeview",
     background=BLANCO, foreground="#2c3e50",
-    rowheight=26, fieldbackground=BLANCO, font=FONT)
+    rowheight=32, fieldbackground=BLANCO, font=FONT)
 style.configure("Treeview.Heading",
     background=AZUL, foreground=BLANCO, font=BOLD, relief="flat")
 style.map("Treeview",
@@ -36,15 +37,15 @@ style.map("Treeview",
 # ======== TÍTULO ========
 frame_titulo = tk.Frame(ventana, bg=AZUL)
 frame_titulo.pack(fill="x")
-tk.Label(frame_titulo, text="Directorio",
-         bg=AZUL, fg=BLANCO, font=("Segoe UI", 14, "bold"), pady=10).pack()
+tk.Label(frame_titulo, text="Directorio Telefónico",
+         bg=AZUL, fg=BLANCO, font=("Segoe UI", 18, "bold"), pady=14).pack()
 
 # ======== BÚSQUEDA ========
 frame_busqueda = tk.Frame(ventana, bg=BG)
 frame_busqueda.pack(fill="x", padx=15, pady=(10, 4))
 
 tk.Label(frame_busqueda, text="Buscar:", bg=BG, font=FONT).pack(side="left")
-buscar_entry = tk.Entry(frame_busqueda, width=34, font=FONT)
+buscar_entry = tk.Entry(frame_busqueda, width=38, font=FONT)
 buscar_entry.pack(side="left", padx=8)
 
 ttk.Separator(ventana, orient="horizontal").pack(fill="x", padx=15, pady=4)
@@ -60,31 +61,34 @@ def solo_numeros(val):
 def solo_numeros_max10(val):
     return (val == "" or val.isdigit()) and len(val) <= 10
 
-vcmd    = (ventana.register(solo_numeros),    "%P")
-vcmd10  = (ventana.register(solo_numeros_max10), "%P")
+vcmd   = (ventana.register(solo_numeros),    "%P")
+vcmd10 = (ventana.register(solo_numeros_max10), "%P")
 
 # Fila 1: Expediente + Nombre
 fila1 = tk.Frame(frame_form, bg=BG)
 fila1.pack(fill="x", pady=4)
-tk.Label(fila1, text="Expediente *", bg=BG, font=FONT, width=22, anchor="e").pack(side="left")
+tk.Label(fila1, text="Expediente *", bg=BG, font=FONT, width=20, anchor="e").pack(side="left")
 expediente_entry = tk.Entry(fila1, font=FONT, width=12, validate="key", validatecommand=vcmd)
-expediente_entry.pack(side="left", padx=(4, 20))
+expediente_entry.pack(side="left", padx=(6, 24))
 tk.Label(fila1, text="Nombre *", bg=BG, font=FONT, anchor="e").pack(side="left")
-nombre_entry = tk.Entry(fila1, font=FONT, width=32)
-nombre_entry.pack(side="left", padx=4)
+nombre_entry = tk.Entry(fila1, font=FONT, width=34)
+nombre_entry.pack(side="left", padx=6)
 
-# Fila 2: Teléfono
+# Fila 2: Teléfono 1 + Teléfono 2
 fila2 = tk.Frame(frame_form, bg=BG)
-fila2.pack(fill="x", pady=4)
-tk.Label(fila2, text="Teléfono * (10 dígitos)", bg=BG, font=FONT, width=22, anchor="e").pack(side="left")
+fila2.pack(fill="x", pady=6)
+tk.Label(fila2, text="Teléfono 1 * (10 dígitos)", bg=BG, font=FONT, width=20, anchor="e").pack(side="left")
 telefono_entry = tk.Entry(fila2, font=FONT, width=14, validate="key", validatecommand=vcmd10)
-telefono_entry.pack(side="left", padx=4)
+telefono_entry.pack(side="left", padx=(6, 24))
+tk.Label(fila2, text="Teléfono 2 (opcional)", bg=BG, font=FONT, anchor="e").pack(side="left")
+telefono2_entry = tk.Entry(fila2, font=FONT, width=14, validate="key", validatecommand=vcmd10)
+telefono2_entry.pack(side="left", padx=6)
 
 ttk.Separator(ventana, orient="horizontal").pack(fill="x", padx=15, pady=6)
 
 # ======== FUNCIONES ========
 
-def validar_campos(expediente, nombre, telefono):
+def validar_campos(expediente, nombre, telefono, telefono2):
     if not expediente.strip():
         messagebox.showerror("Campo vacío", "El número de expediente es obligatorio.")
         expediente_entry.focus()
@@ -98,12 +102,16 @@ def validar_campos(expediente, nombre, telefono):
         nombre_entry.focus()
         return False
     if not telefono.strip():
-        messagebox.showerror("Campo vacío", "El teléfono es obligatorio.")
+        messagebox.showerror("Campo vacío", "El teléfono 1 es obligatorio.")
         telefono_entry.focus()
         return False
     if len(telefono.strip()) != 10:
-        messagebox.showerror("Teléfono inválido", "El teléfono debe tener exactamente 10 dígitos.")
+        messagebox.showerror("Teléfono inválido", "El teléfono 1 debe tener exactamente 10 dígitos.")
         telefono_entry.focus()
+        return False
+    if telefono2.strip() and len(telefono2.strip()) != 10:
+        messagebox.showerror("Teléfono inválido", "El teléfono 2 debe tener exactamente 10 dígitos.")
+        telefono2_entry.focus()
         return False
     return True
 
@@ -117,7 +125,7 @@ def cargar_datos(datos=None):
         tag = "par" if i % 2 == 0 else "impar"
         tabla.insert("", tk.END, values=d, tags=(tag,))
     tabla.tag_configure("par",   background=BLANCO)
-    tabla.tag_configure("impar", background="#eaf3fb")
+    tabla.tag_configure("impar", background="#e6f2f0")
     total = len(datos)
     sufijo = "s" if total != 1 else ""
     status_var.set(f"  {total} paciente{sufijo} encontrado{sufijo}")
@@ -128,6 +136,7 @@ def limpiar_campos():
     expediente_entry.delete(0, tk.END)
     nombre_entry.delete(0, tk.END)
     telefono_entry.delete(0, tk.END)
+    telefono2_entry.delete(0, tk.END)
     if tabla.selection():
         tabla.selection_remove(tabla.selection())
 
@@ -136,11 +145,12 @@ def agregar():
     expediente = expediente_entry.get().strip()
     nombre     = nombre_entry.get().strip()
     telefono   = telefono_entry.get().strip()
+    telefono2  = telefono2_entry.get().strip()
 
-    if not validar_campos(expediente, nombre, telefono):
+    if not validar_campos(expediente, nombre, telefono, telefono2):
         return
 
-    if not agregar_persona(expediente, nombre, telefono):
+    if not agregar_persona(expediente, nombre, telefono, telefono2):
         messagebox.showerror("Expediente duplicado",
             f"Ya existe un paciente con el expediente {expediente}.")
         expediente_entry.focus()
@@ -174,11 +184,12 @@ def actualizar():
     expediente = str(valores[0])
     nombre     = nombre_entry.get().strip()
     telefono   = telefono_entry.get().strip()
+    telefono2  = telefono2_entry.get().strip()
 
-    if not validar_campos(expediente, nombre, telefono):
+    if not validar_campos(expediente, nombre, telefono, telefono2):
         return
 
-    actualizar_persona(expediente, nombre, telefono)
+    actualizar_persona(expediente, nombre, telefono, telefono2)
     limpiar_campos()
     cargar_datos()
 
@@ -211,6 +222,8 @@ def al_seleccionar(event):
         nombre_entry.insert(0, valores[1])
         telefono_entry.delete(0, tk.END)
         telefono_entry.insert(0, valores[2])
+        telefono2_entry.delete(0, tk.END)
+        telefono2_entry.insert(0, valores[3] if valores[3] else "")
 
 # ======== BOTONES ========
 frame_btns = tk.Frame(ventana, bg=BG)
@@ -218,19 +231,19 @@ frame_btns.pack(fill="x", padx=15, pady=(0, 6))
 
 def btn(parent, text, color, cmd):
     f = tk.Frame(parent, bg=color, cursor="hand2")
-    l = tk.Label(f, text=text, bg=color, fg=BLANCO, font=BOLD, padx=14, pady=5)
+    l = tk.Label(f, text=text, bg=color, fg=BLANCO, font=BOLD, padx=18, pady=8)
     l.pack()
     l.bind("<Button-1>", lambda e: cmd())
     f.bind("<Button-1>", lambda e: cmd())
     return f
 
 btn(frame_btns, "Agregar",        VERDE, agregar).pack(side="left", padx=(0, 6))
-btn(frame_btns, "Actualizar",     AZUL,  actualizar).pack(side="left", padx=6)
+btn(frame_btns, "Actualizar",     BOTON, actualizar).pack(side="left", padx=6)
 btn(frame_btns, "Eliminar",       ROJO,  eliminar).pack(side="left", padx=6)
 btn(frame_btns, "Limpiar campos", GRIS,  limpiar_campos).pack(side="right")
 
-# Botones de búsqueda (ahora que btn() existe)
-btn(frame_busqueda, "Buscar",   AZUL, buscar).pack(side="left", padx=2)
+# Botones de búsqueda
+btn(frame_busqueda, "Buscar",    BOTON, buscar).pack(side="left", padx=2)
 btn(frame_busqueda, "Ver todos", GRIS, limpiar_busqueda).pack(side="left", padx=2)
 
 # ======== TABLA ========
@@ -238,14 +251,16 @@ frame_tabla = tk.Frame(ventana, bg=BG)
 frame_tabla.pack(fill="both", expand=True, padx=15, pady=(0, 4))
 
 tabla = ttk.Treeview(frame_tabla,
-    columns=("Expediente", "Nombre", "Telefono"),
-    show="headings", height=11)
+    columns=("Expediente", "Nombre", "Telefono", "Telefono2"),
+    show="headings", height=10)
 tabla.heading("Expediente", text="Expediente")
 tabla.heading("Nombre",     text="Nombre")
-tabla.heading("Telefono",   text="Teléfono")
-tabla.column("Expediente", width=100, anchor="center")
+tabla.heading("Telefono",   text="Teléfono 1")
+tabla.heading("Telefono2",  text="Teléfono 2")
+tabla.column("Expediente", width=110,  anchor="center")
 tabla.column("Nombre",     width=380)
-tabla.column("Telefono",   width=140, anchor="center")
+tabla.column("Telefono",   width=150, anchor="center")
+tabla.column("Telefono2",  width=150, anchor="center")
 
 scrollbar = ttk.Scrollbar(frame_tabla, orient="vertical", command=tabla.yview)
 tabla.configure(yscrollcommand=scrollbar.set)
@@ -255,8 +270,8 @@ scrollbar.pack(side="right", fill="y")
 # ======== BARRA DE ESTADO ========
 status_var = tk.StringVar(value="")
 tk.Label(ventana, textvariable=status_var,
-         bg=AZUL, fg=BLANCO, font=("Segoe UI", 9),
-         anchor="w", padx=10, pady=4).pack(fill="x", side="bottom")
+         bg=AZUL, fg=BLANCO, font=("Segoe UI", 11),
+         anchor="w", padx=12, pady=5).pack(fill="x", side="bottom")
 
 # ======== BINDINGS ========
 tabla.bind("<<TreeviewSelect>>", al_seleccionar)

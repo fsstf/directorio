@@ -1,5 +1,6 @@
 import sqlite3
 
+
 def crear_bd():
     conn = sqlite3.connect("directorio.db")
     cursor = conn.cursor()
@@ -8,22 +9,29 @@ def crear_bd():
     CREATE TABLE IF NOT EXISTS directorio (
         expediente INTEGER PRIMARY KEY,
         nombre TEXT NOT NULL,
-        telefono TEXT NOT NULL
+        telefono TEXT NOT NULL,
+        telefono2 TEXT
     )
     """)
+
+    # Migración: agrega telefono2 si la tabla ya existía sin esa columna
+    try:
+        cursor.execute("ALTER TABLE directorio ADD COLUMN telefono2 TEXT")
+    except Exception:
+        pass
 
     conn.commit()
     conn.close()
 
 
-def agregar_persona(expediente, nombre, telefono):
+def agregar_persona(expediente, nombre, telefono, telefono2=""):
     conn = sqlite3.connect("directorio.db")
     cursor = conn.cursor()
 
     try:
         cursor.execute(
-            "INSERT INTO directorio VALUES (?, ?, ?)",
-            (expediente, nombre, telefono)
+            "INSERT INTO directorio VALUES (?, ?, ?, ?)",
+            (expediente, nombre, telefono, telefono2)
         )
         conn.commit()
         conn.close()
@@ -44,15 +52,15 @@ def ver_directorio():
     return datos
 
 
-def actualizar_persona(expediente, nombre, telefono):
+def actualizar_persona(expediente, nombre, telefono, telefono2=""):
     conn = sqlite3.connect("directorio.db")
     cursor = conn.cursor()
 
     cursor.execute("""
         UPDATE directorio
-        SET nombre = ?, telefono = ?
+        SET nombre = ?, telefono = ?, telefono2 = ?
         WHERE expediente = ?
-    """, (nombre, telefono, expediente))
+    """, (nombre, telefono, telefono2, expediente))
 
     conn.commit()
     conn.close()
